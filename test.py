@@ -32,3 +32,15 @@ def test_nonStringFenBool():
         assert test.fen == startingFen
 
 # ------------------------------------------------------------ 4 tests: total 4
+# -------------------- test sub-string assumptions ----------------------------
+
+# In handling a string input I have made the following assumptions
+#       1) the first sub-string is always the board
+#       2) the last sub-string is always the move counter IF A DIGIT
+#       3) the penultimate sub-string is always the half move clock IF A DIGIT
+
+def test_noBoardSubstring():
+    with mock.patch('builtins.input',side_effect = ['rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R', 'w', 'KQkq', '-','5', '20']):
+        test = Fen(fen = 'w KQkq - 5 20')
+        # no board element passed
+        assert test.fen == 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 5 20'

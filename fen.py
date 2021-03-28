@@ -3,16 +3,35 @@ import chess
 class Fen():
 
     def __init__(self, fen = chess.STARTING_FEN):
-        self.fen = fen
-
-        if not isinstance(self.fen, str):
-            self.board = chess.Board()
+        self.fen = fen.strip()
+        if not isinstance(self.fen, str): # non-string input
             self.fen = chess.STARTING_FEN
+            self.board = chess.Board(self.fen)
         else:
-            try:
+            fenList = fen.split(' ')
+            lenFenList = len(fenList)
+            # pad fenList
+            for count in range(6):
+                if count < lenFenList:
+                    pass
+                else:
+                    fenList.insert(count, '?')
+                    lenFenList = len(fenList)
+                    self.fen = self.fenReconstruct(fenList)
+            boardError = True
+            while boardError:
+                try:
+                    self.board = chess.Board(self.fen)
+                except ValueError as e:
+                    print(e)
+                    if str(e) == "expected 'w' or 'b' for turn part of fen: " + "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 't')
+                    if str(e) == "invalid castling part in fen: " + "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 'c')
+                    if str(e) == "invalid en passant part in fen: " + "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 'e')
+                boardError = False
                 self.board = chess.Board(self.fen)
-            except ValueError as e:
-                print(e)
 
     def __str__(self):
         return self.board.board
@@ -22,8 +41,9 @@ class Fen():
 
     def inputFen(self, fen, selector = '?'):
         fenList = self.fen.split(' ')
+        print('original fen: ' + fen)
+        print('current fen: ' + self.fen)
         while selector not in ['b','t','c','e','h','m','x']:
-            print('current fen: ' + self.fen)
             print("""
             What element of the FEN do you want to amend?
                 (b)oard
@@ -50,7 +70,7 @@ class Fen():
                 print('present Turn element: '+fenList[1]+'\n')
                 turn = input('input turn to play (w/b):\n')
             fenList[1] = turn
-            self.fen = self.fenRecostruct(fenList)
+            self.fen = self.fenReconstruct(fenList)
             print('new fen: ' + self.fen)
 
         elif selector == 'c':
@@ -101,8 +121,13 @@ class Fen():
         elif selector == 'x':
             print('no changes made\n')
             print('current fen: ' + self.fen)
-            return self.fen
 
     def fenReconstruct(self, fenList):
         fen = fenList[0]+' '+fenList[1]+' '+fenList[2]+' '+fenList[3]+' '+fenList[4]+' '+fenList[5]
         return fen
+
+
+# test
+test = Fen('8/8/k7/8/8/8/P7/K7 w - x 0 1')
+print(type(test.board))
+print(test.board)
