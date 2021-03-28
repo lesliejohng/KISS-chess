@@ -22,16 +22,17 @@ class Fen():
             while boardError:
                 try:
                     self.board = chess.Board(self.fen)
+                    break
                 except ValueError as e:
                     print(e)
                     if str(e) == "expected 'w' or 'b' for turn part of fen: " + "'" + self.fen + "'":
                         self.inputFen(fen = fen, selector = 't')
-                    if str(e) == "invalid castling part in fen: " + "'" + self.fen + "'":
+                    elif str(e) == "invalid castling part in fen: " + "'" + self.fen + "'":
                         self.inputFen(fen = fen, selector = 'c')
-                    if str(e) == "invalid en passant part in fen: " + "'" + self.fen + "'":
+                    elif str(e) == "invalid en passant part in fen: " + "'" + self.fen + "'":
                         self.inputFen(fen = fen, selector = 'e')
-                boardError = False
-                self.board = chess.Board(self.fen)
+
+            print(self.board)
 
     def __str__(self):
         return self.board.board
@@ -128,6 +129,6 @@ class Fen():
 
 
 # test
-test = Fen('8/8/k7/8/8/8/P7/K7 w - x 0 1')
+test = Fen('8/8/k7/8/8/8/P7/K7 x x - 0 1')
 print(type(test.board))
 print(test.board)
