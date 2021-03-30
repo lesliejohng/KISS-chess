@@ -3,23 +3,54 @@ import chess
 class Fen():
 
     def __init__(self, fen = chess.STARTING_FEN):
-        self.fen = fen.strip()
+        self.fen = fen
+        # check fen is a sring
         if not isinstance(self.fen, str): # non-string input
             self.fen = chess.STARTING_FEN
             self.board = chess.Board(self.fen)
         else:
+            #pre-processing of fen
+            self.fen = self.fen.strip()
             fenList = fen.split(' ')
             lenFenList = len(fenList)
-            # pad fenList
-            for count in range(6):
-                if count < lenFenList:
-                    pass
-                else:
-                    fenList.insert(count, '?')
-                    lenFenList = len(fenList)
-                    self.fen = self.fenReconstruct(fenList)
-            boardError = True
-            while boardError:
+            # rebuild fen if elements out of order
+            amendedFenList = ['?','?','?','?','?','?']
+            for element in fenList:
+                if element.count('/') == 7:
+                    amendedFenList[0] = element
+                elif element == 'w' or element == 'b':
+                    amendedFenList[1] = element
+                elif element in ['q','k','kq','Q','Qq','Qk','Qkq','K',
+                           'Kq','Kk','Kkq','KQ','KQq','KQk','KQkq']:
+                    amendedFenList[2] = element
+                elif element in ['a6','b6','c6','d6','e6','f6','g6','h6',
+                                 'a3','b3','c3','d3','e3','f3','g3','h3']:
+                    amendedElement[3] = element
+            # check whether last two items are digits and reposition in fenList
+            if fenList[-1].isdigit() and fenList[-2].isdigit():
+                amendedFenList[4] = fenList[-2]
+                amendedFenList[5] = fenList[-1]
+            else:
+                # reset halfMove and move elements of fen
+                amendedFenList[4] = '0'
+                amendedFenList[5] = '1'
+            #allocate '-' items if possible
+            if fenList.count('-') > 1:
+                if amendedFenList[2] == '?':
+                    amendedFenList[2] = '-'
+                if amendedFenList[3] == '?':
+                    amendedFenList[3] = '-'
+            if fenList.count('-') == 1:
+                if amendedFenList[2] == '?' and amendedFenList[3] != '?':
+                    amendedFenList[2] = '-'
+                if amendedFenList[2] != '?' and amendedFenList[3] == '?':
+                    amendedFenList[3] = '-'
+            # reset fenList and fen
+            fenList = amendedFenList
+            self.fen = self.fenReconstruct(fenList = fenList)
+            print(self.fen)
+            # main processing
+            while True:
                 try:
                     self.board = chess.Board(self.fen)
                     break
@@ -31,6 +62,16 @@ class Fen():
                         self.inputFen(fen = fen, selector = 'c')
                     elif str(e) == "invalid en passant part in fen: " + "'" + self.fen + "'":
                         self.inputFen(fen = fen, selector = 'e')
+                    elif str(e) == "invalid half-move clock in fen: " + "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 'h')
+                    elif str(e) == "half-move clock cannot be negative: " +  "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 'h')
+                    elif str(e) == "invalid fullmove number in fen: " +  "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 'm')
+                    elif str(e) == "fullmove number cannot be negative: " +  "'" + self.fen + "'":
+                        self.inputFen(fen = fen, selector = 'm')
+                    elif str(e) == "expected 8 rows in position part of fen: " + "'" + fenList[0] + "'":
+                        self.inputFen(fen = fen, selector = 'b')
 
             print(self.board)
 
@@ -129,6 +170,6 @@ class Fen():
 
 
 # test
-test = Fen('8/8/k7/8/8/8/P7/K7 x x - 0 1')
+test = Fen('rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2')
 print(type(test.board))
 print(test.board)
